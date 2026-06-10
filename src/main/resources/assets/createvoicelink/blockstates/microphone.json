@@ -1,8 +1,8 @@
 {
   "variants": {
-    "facing=north": { "model": "createvoicelink:block/microphone" },
+    "facing=north": { "model": "createvoicelink:block/microphone", "y": 0 },
+    "facing=east":  { "model": "createvoicelink:block/microphone", "y": 90 },
     "facing=south": { "model": "createvoicelink:block/microphone", "y": 180 },
-    "facing=west": { "model": "createvoicelink:block/microphone", "y": 270 },
-    "facing=east": { "model": "createvoicelink:block/microphone", "y": 90 }
+    "facing=west":  { "model": "createvoicelink:block/microphone", "y": 270 }
   }
 }

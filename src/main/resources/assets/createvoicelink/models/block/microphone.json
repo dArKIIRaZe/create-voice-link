@@ -1,6 +1,60 @@
 {
-  "parent": "block/cube_all",
+  "credit": "Made by Raze Agent Collective",
+  "texture_size": [16, 16],
   "textures": {
-    "all": "createvoicelink:block/microphone"
-  }
+    "mic": "createvoicelink:block/microphone",
+    "side": "createvoicelink:block/microphone_side",
+    "particle": "createvoicelink:block/microphone_side"
+  },
+  "elements": [
+    {
+      "comment": "mic capsule - brass dome",
+      "from": [5, 10, 5],
+      "to": [11, 14, 11],
+      "faces": {
+        "north": {"uv": [5, 2, 11, 6], "texture": "#mic"},
+        "south": {"uv": [5, 2, 11, 6], "texture": "#mic"},
+        "east": {"uv": [5, 2, 11, 6], "texture": "#mic"},
+        "west": {"uv": [5, 2, 11, 6], "texture": "#mic"},
+        "up": {"uv": [5, 2, 11, 6], "texture": "#mic"},
+        "down": {"uv": [5, 14, 11, 16], "texture": "#mic"}
+      }
+    },
+    {
+      "comment": "mic grille bars",
+      "from": [4, 8, 4],
+      "to": [12, 10, 12],
+      "faces": {
+        "north": {"uv": [4, 6, 12, 8], "texture": "#side"},
+        "south": {"uv": [4, 6, 12, 8], "texture": "#side"},
+        "east": {"uv": [4, 6, 12, 8], "texture": "#side"},
+        "west": {"uv": [4, 6, 12, 8], "texture": "#side"},
+        "up": {"uv": [4, 6, 12, 8], "texture": "#side"}
+      }
+    },
+    {
+      "comment": "stand pole",
+      "from": [7, 1, 7],
+      "to": [9, 8, 9],
+      "faces": {
+        "north": {"uv": [7, 8, 9, 15], "texture": "#side"},
+        "south": {"uv": [7, 8, 9, 15], "texture": "#side"},
+        "east": {"uv": [7, 8, 9, 15], "texture": "#side"},
+        "west": {"uv": [7, 8, 9, 15], "texture": "#side"}
+      }
+    },
+    {
+      "comment": "base",
+      "from": [4, 0, 4],
+      "to": [12, 2, 12],
+      "faces": {
+        "north": {"uv": [4, 14, 12, 16], "texture": "#side"},
+        "south": {"uv": [4, 14, 12, 16], "texture": "#side"},
+        "east": {"uv": [4, 14, 12, 16], "texture": "#side"},
+        "west": {"uv": [4, 14, 12, 16], "texture": "#side"},
+        "up": {"uv": [4, 14, 12, 10], "texture": "#side"},
+        "down": {"uv": [4, 0, 12, 4], "texture": "#side"}
+      }
+    }
+  ]
 }
