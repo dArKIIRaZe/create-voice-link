@@ -5,16 +5,8 @@ loaderVersion = "[4,)"
 modId = "createvoicelink"
 version = "1.0.0"
 displayName = "Create: Voice Link"
-displayURL = "https://github.com/dArKIIRaZe/create-voice-link"
-logoFile = "assets/createvoicelink/icon.png"
-authors = "Dark, Raze Agent Collective"
-description = '''
-Speak to control your Create Redstone Links.
-Voice-activated automation for Create mod.
-Uses Vosk STT and Simple Voice Chat integration.
-'''
+description = "Voice-activated Create Redstone Links"
 license = "MIT"
-credits = "Built by Dark and the Raze Agent Collective"
 
 [[dependencies.createvoicelink]]
 modId = "neoforge"
