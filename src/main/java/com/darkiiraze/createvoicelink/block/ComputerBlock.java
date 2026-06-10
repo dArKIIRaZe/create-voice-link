@@ -1,6 +1,7 @@
 package com.darkiiraze.createvoicelink.block;
 
 import com.darkiiraze.createvoicelink.ModBlockEntities;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -33,6 +34,11 @@ public class ComputerBlock extends BaseEntityBlock {
     public ComputerBlock(Properties properties) {
         super(properties);
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return simpleCodec(ComputerBlock::new);
     }
 
     @Override

@@ -8,6 +8,8 @@ import com.darkiiraze.createvoicelink.voice.ModelDownloader;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -24,7 +26,7 @@ public class ComputerScreen extends AbstractContainerScreen<ComputerMenu> {
     private EditBox phraseField;
     private EditBox freqField;
     private Button addButton;
-    private List<CommandWidget> commandWidgets = new ArrayList<>();
+    private List<Button> commandButtons = new ArrayList<>();
     
     private int leftPos, topPos;
     private int imageWidth = 256, imageHeight = 220;
@@ -64,8 +66,10 @@ public class ComputerScreen extends AbstractContainerScreen<ComputerMenu> {
     }
     
     private void rebuildCommandList() {
-        commandWidgets.forEach(this::removeWidget);
-        commandWidgets.clear();
+        for (Button btn : commandButtons) {
+            removeWidget(btn);
+        }
+        commandButtons.clear();
         
         ComputerBlockEntity comp = menu.getComputer();
         if (comp == null) return;
@@ -76,11 +80,11 @@ public class ComputerScreen extends AbstractContainerScreen<ComputerMenu> {
             ComputerBlockEntity.VoiceCommand cmd = entry.getValue();
             String label = cmd.phrase + " [" + cmd.samples.size() + " samples]";
             
-            Button delBtn = Button.builder(Component.literal("X"), btn -> {
+            Button delBtn = Button.builder(Component.literal(label + "  X"), btn -> {
                 PacketDistributor.sendToServer(new RemoveCommandPacket(cmd.phrase));
-            }).bounds(leftPos + 218, y + idx * 22, 14, 18).build();
+            }).bounds(leftPos + 8, y + idx * 22, 224, 18).build();
             addRenderableWidget(delBtn);
-            commandWidgets.add(new CommandWidget(leftPos + 8, y + idx * 22, label, delBtn));
+            commandButtons.add(delBtn);
             idx++;
         }
     }
@@ -94,10 +98,6 @@ public class ComputerScreen extends AbstractContainerScreen<ComputerMenu> {
     public void render(GuiGraphics gui, int mouseX, int mouseY, float partialTick) {
         super.render(gui, mouseX, mouseY, partialTick);
         
-        for (CommandWidget cw : commandWidgets) {
-            gui.drawString(font, cw.label, cw.x, cw.y + 2, 0xFFFFFF);
-        }
-        
         ComputerBlockEntity comp = menu.getComputer();
         String header = comp != null ? comp.getComputerName() : "Voice Computer";
         String powerText = comp != null && comp.isPowered() 
@@ -107,7 +107,6 @@ public class ComputerScreen extends AbstractContainerScreen<ComputerMenu> {
         gui.drawCenteredString(font, header, leftPos + imageWidth / 2, topPos + 5, 0xAAAAAA);
         gui.drawString(font, powerText, leftPos + imageWidth - 55, topPos + 5, powerColor);
         
-        // STT model download status
         if (!ModelDownloader.isModelReady()) {
             int modelY = topPos + imageHeight - 14;
             String modelStatus = ModelDownloader.getStatus();
@@ -131,6 +130,4 @@ public class ComputerScreen extends AbstractContainerScreen<ComputerMenu> {
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
-    
-    private record CommandWidget(int x, int y, String label, Button deleteBtn) {}
 }

@@ -5,16 +5,11 @@ import de.maxhenkel.voicechat.api.VoicechatApi;
 import de.maxhenkel.voicechat.api.VoicechatPlugin;
 import de.maxhenkel.voicechat.api.events.EventRegistration;
 import de.maxhenkel.voicechat.api.events.MicrophonePacketEvent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Simple Voice Chat integration.
- * Intercepts microphone packets at the server level, decodes Opus audio,
- * and routes PCM data to the Vosk STT pipeline for voice command recognition.
- *
- * This must be registered as a "voicechat" entrypoint in neoforge.mods.toml:
- *   [[entrypoints]]
- *   type = "voicechat"
- *   value = "com.darkiiraze.createvoicelink.voice.VoiceChatPlugin"
  */
 public class VoiceChatPlugin implements VoicechatPlugin {
 
@@ -50,9 +45,12 @@ public class VoiceChatPlugin implements VoicechatPlugin {
         byte[] opusData = event.getPacket().getOpusEncodedData();
         if (opusData == null || opusData.length == 0) return;
         
+        ServerPlayer sp = (ServerPlayer) player.getPlayer();
+        Vec3 position = sp.position();
+        
         commandEngine.processVoicePacket(
             player.getUuid(),
-            player.getPlayer().position(),
+            position,
             player.getServerLevel(),
             opusData
         );

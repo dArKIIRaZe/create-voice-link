@@ -1,23 +1,18 @@
 package com.darkiiraze.createvoicelink;
 
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.registries.DeferredBlock;
-import net.neoforged.neoforge.registries.DeferredItem;
-import net.neoforged.neoforge.registries.DeferredHolder;
-
-import static net.minecraft.core.registries.Registries.CREATIVE_MODE_TAB;
+import com.darkiiraze.createvoicelink.block.ModBlocks;
+import com.darkiiraze.createvoicelink.item.ModItems;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-
-import com.darkiiraze.createvoicelink.block.ModBlocks;
-
-import java.util.function.Supplier;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class ModTabs {
     public static final DeferredRegister<CreativeModeTab> TABS = 
-        DeferredRegister.create(CREATIVE_MODE_TAB, CreateVoiceLink.MODID);
+        DeferredRegister.create(Registries.CREATIVE_MODE_TAB, CreateVoiceLink.MODID);
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> VOICE_LINK_TAB = 
         TABS.register("voice_link_tab", () -> CreativeModeTab.builder()

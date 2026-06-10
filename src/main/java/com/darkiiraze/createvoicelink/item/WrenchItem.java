@@ -4,6 +4,8 @@ import com.darkiiraze.createvoicelink.block.ComputerBlockEntity;
 import com.darkiiraze.createvoicelink.block.MicrophoneBlockEntity;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
@@ -17,9 +19,6 @@ import java.util.List;
 
 /**
  * The Wrench links Microphone blocks to Computer blocks.
- * Right-click a Microphone, then right-click a Computer to link them.
- * Sneak + right-click a Microphone to clear all its linked computers.
- * Sneak + right-click a Computer to open the command GUI (direct access).
  */
 public class WrenchItem extends Item {
     public WrenchItem(Properties properties) {
@@ -37,20 +36,22 @@ public class WrenchItem extends Item {
         if (level.isClientSide) return InteractionResult.SUCCESS;
 
         if (be instanceof MicrophoneBlockEntity mic) {
+            CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CompoundTag.EMPTY).copy();
             if (sneak) {
-                // Sneak clears all links from this microphone
                 int count = mic.getLinkedComputers().size();
                 mic.getLinkedComputers().clear();
                 mic.setChanged();
+                tag.remove("LinkSource");
+                tag.remove("IsMic");
+                stack.set(DataComponents.CUSTOM_DATA, tag);
                 ctx.getPlayer().displayClientMessage(
                     Component.literal("Cleared " + count + " computer link(s) from " + mic.getName())
                         .withStyle(ChatFormatting.YELLOW), true);
                 return InteractionResult.SUCCESS;
             } else {
-                // Store this microphone position for next right-click
-                var tag = stack.getOrCreateTag();
                 tag.putLong("LinkSource", pos.asLong());
                 tag.putBoolean("IsMic", true);
+                stack.set(DataComponents.CUSTOM_DATA, tag);
                 ctx.getPlayer().displayClientMessage(
                     Component.literal("Linked from " + mic.getName() + " — right-click a Computer to complete link")
                         .withStyle(ChatFormatting.GREEN), true);
@@ -59,28 +60,31 @@ public class WrenchItem extends Item {
         }
         
         if (be instanceof ComputerBlockEntity comp) {
-            var tag = stack.getOrCreateTag();
+            CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CompoundTag.EMPTY).copy();
             if (tag.getBoolean("IsMic") && tag.contains("LinkSource")) {
-                // Complete the link: Mic -> Computer
                 BlockPos micPos = BlockPos.of(tag.getLong("LinkSource"));
                 BlockEntity micBe = level.getBlockEntity(micPos);
                 if (micBe instanceof MicrophoneBlockEntity mic) {
                     mic.linkToComputer(pos);
                     tag.remove("LinkSource");
                     tag.remove("IsMic");
+                    stack.set(DataComponents.CUSTOM_DATA, tag);
                     ctx.getPlayer().displayClientMessage(
                         Component.literal(mic.getName() + " linked to " + comp.getComputerName())
                             .withStyle(ChatFormatting.GREEN), true);
                 } else {
+                    tag.remove("LinkSource");
+                    tag.remove("IsMic");
+                    stack.set(DataComponents.CUSTOM_DATA, tag);
                     ctx.getPlayer().displayClientMessage(
                         Component.literal("Original block removed — link cancelled")
                             .withStyle(ChatFormatting.RED), true);
                 }
                 return InteractionResult.SUCCESS;
             } else if (sneak && tag.getBoolean("IsMic")) {
-                // Sneak cancels the linking
                 tag.remove("LinkSource");
                 tag.remove("IsMic");
+                stack.set(DataComponents.CUSTOM_DATA, tag);
                 ctx.getPlayer().displayClientMessage(
                     Component.literal("Link cancelled").withStyle(ChatFormatting.GRAY), true);
                 return InteractionResult.SUCCESS;

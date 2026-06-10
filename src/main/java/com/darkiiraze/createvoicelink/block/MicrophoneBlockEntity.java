@@ -1,14 +1,13 @@
 package com.darkiiraze.createvoicelink.block;
 
-import com.darkiiraze.createvoicelink.voice.VoiceNetwork;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 public class MicrophoneBlockEntity extends BlockEntity {
     /** Computer blocks this microphone is linked to via wrench */
@@ -21,8 +20,6 @@ public class MicrophoneBlockEntity extends BlockEntity {
 
     public void tick() {
         // Microphone is passive — voice data flows through VoiceChatPlugin.
-        // The server-side voice pipeline checks proximity to MicrophoneBlockEntities
-        // and routes recognised commands to linked computers.
     }
 
     public void linkToComputer(BlockPos computerPos) {
@@ -49,12 +46,12 @@ public class MicrophoneBlockEntity extends BlockEntity {
     }
 
     public boolean isPlayerInRange(BlockPos playerPos) {
-        return playerPos.distSqr(worldPosition) <= 100; // 10 blocks
+        return playerPos.distSqr(worldPosition) <= 100;
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
         tag.putString("Name", name);
         tag.putInt("LinkedComputerCount", linkedComputers.size());
         int i = 0;
@@ -65,8 +62,8 @@ public class MicrophoneBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag) {
-        super.loadAdditional(tag);
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
         name = tag.getString("Name");
         linkedComputers.clear();
         int count = tag.getInt("LinkedComputerCount");
