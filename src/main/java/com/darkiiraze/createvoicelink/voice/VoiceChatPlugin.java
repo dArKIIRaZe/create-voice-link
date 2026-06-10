@@ -3,8 +3,10 @@ package com.darkiiraze.createvoicelink.voice;
 import com.darkiiraze.createvoicelink.CreateVoiceLink;
 import de.maxhenkel.voicechat.api.VoicechatApi;
 import de.maxhenkel.voicechat.api.VoicechatPlugin;
+import de.maxhenkel.voicechat.api.VoicechatServerPlayer;
 import de.maxhenkel.voicechat.api.events.EventRegistration;
 import de.maxhenkel.voicechat.api.events.MicrophonePacketEvent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 
@@ -40,18 +42,19 @@ public class VoiceChatPlugin implements VoicechatPlugin {
         if (conn == null) return;
         
         var player = conn.getPlayer();
-        if (player == null) return;
+        if (!(player instanceof VoicechatServerPlayer vcPlayer)) return;
         
         byte[] opusData = event.getPacket().getOpusEncodedData();
         if (opusData == null || opusData.length == 0) return;
         
-        ServerPlayer sp = (ServerPlayer) player.getPlayer();
+        ServerLevel level = (ServerLevel) vcPlayer.getServerLevel();
+        ServerPlayer sp = (ServerPlayer) vcPlayer.getPlayer();
         Vec3 position = sp.position();
         
         commandEngine.processVoicePacket(
             player.getUuid(),
             position,
-            player.getServerLevel(),
+            level,
             opusData
         );
     }

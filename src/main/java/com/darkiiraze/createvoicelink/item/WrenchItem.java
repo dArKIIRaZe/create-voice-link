@@ -11,6 +11,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -36,14 +37,14 @@ public class WrenchItem extends Item {
         if (level.isClientSide) return InteractionResult.SUCCESS;
 
         if (be instanceof MicrophoneBlockEntity mic) {
-            CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CompoundTag.EMPTY).copy();
+            CompoundTag tag = getOrCreateTag(stack);
             if (sneak) {
                 int count = mic.getLinkedComputers().size();
                 mic.getLinkedComputers().clear();
                 mic.setChanged();
                 tag.remove("LinkSource");
                 tag.remove("IsMic");
-                stack.set(DataComponents.CUSTOM_DATA, tag);
+                saveTag(stack, tag);
                 ctx.getPlayer().displayClientMessage(
                     Component.literal("Cleared " + count + " computer link(s) from " + mic.getName())
                         .withStyle(ChatFormatting.YELLOW), true);
@@ -51,7 +52,7 @@ public class WrenchItem extends Item {
             } else {
                 tag.putLong("LinkSource", pos.asLong());
                 tag.putBoolean("IsMic", true);
-                stack.set(DataComponents.CUSTOM_DATA, tag);
+                saveTag(stack, tag);
                 ctx.getPlayer().displayClientMessage(
                     Component.literal("Linked from " + mic.getName() + " — right-click a Computer to complete link")
                         .withStyle(ChatFormatting.GREEN), true);
@@ -60,7 +61,7 @@ public class WrenchItem extends Item {
         }
         
         if (be instanceof ComputerBlockEntity comp) {
-            CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CompoundTag.EMPTY).copy();
+            CompoundTag tag = getOrCreateTag(stack);
             if (tag.getBoolean("IsMic") && tag.contains("LinkSource")) {
                 BlockPos micPos = BlockPos.of(tag.getLong("LinkSource"));
                 BlockEntity micBe = level.getBlockEntity(micPos);
@@ -68,14 +69,14 @@ public class WrenchItem extends Item {
                     mic.linkToComputer(pos);
                     tag.remove("LinkSource");
                     tag.remove("IsMic");
-                    stack.set(DataComponents.CUSTOM_DATA, tag);
+                    saveTag(stack, tag);
                     ctx.getPlayer().displayClientMessage(
                         Component.literal(mic.getName() + " linked to " + comp.getComputerName())
                             .withStyle(ChatFormatting.GREEN), true);
                 } else {
                     tag.remove("LinkSource");
                     tag.remove("IsMic");
-                    stack.set(DataComponents.CUSTOM_DATA, tag);
+                    saveTag(stack, tag);
                     ctx.getPlayer().displayClientMessage(
                         Component.literal("Original block removed — link cancelled")
                             .withStyle(ChatFormatting.RED), true);
@@ -84,7 +85,7 @@ public class WrenchItem extends Item {
             } else if (sneak && tag.getBoolean("IsMic")) {
                 tag.remove("LinkSource");
                 tag.remove("IsMic");
-                stack.set(DataComponents.CUSTOM_DATA, tag);
+                saveTag(stack, tag);
                 ctx.getPlayer().displayClientMessage(
                     Component.literal("Link cancelled").withStyle(ChatFormatting.GRAY), true);
                 return InteractionResult.SUCCESS;
@@ -92,6 +93,15 @@ public class WrenchItem extends Item {
         }
 
         return InteractionResult.PASS;
+    }
+
+    private CompoundTag getOrCreateTag(ItemStack stack) {
+        CustomData data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+        return data.copyTag();
+    }
+
+    private void saveTag(ItemStack stack, CompoundTag tag) {
+        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
 
     @Override

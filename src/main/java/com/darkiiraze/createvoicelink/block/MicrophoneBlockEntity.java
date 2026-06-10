@@ -1,5 +1,6 @@
 package com.darkiiraze.createvoicelink.block;
 
+import com.darkiiraze.createvoicelink.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
