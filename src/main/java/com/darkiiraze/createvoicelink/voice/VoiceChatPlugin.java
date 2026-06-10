@@ -3,7 +3,6 @@ package com.darkiiraze.createvoicelink.voice;
 import com.darkiiraze.createvoicelink.CreateVoiceLink;
 import de.maxhenkel.voicechat.api.VoicechatApi;
 import de.maxhenkel.voicechat.api.VoicechatPlugin;
-import de.maxhenkel.voicechat.api.VoicechatServerPlayer;
 import de.maxhenkel.voicechat.api.events.EventRegistration;
 import de.maxhenkel.voicechat.api.events.MicrophonePacketEvent;
 import net.minecraft.server.level.ServerLevel;
@@ -42,14 +41,19 @@ public class VoiceChatPlugin implements VoicechatPlugin {
         if (conn == null) return;
         
         var player = conn.getPlayer();
-        if (!(player instanceof VoicechatServerPlayer vcPlayer)) return;
+        if (player == null) return;
         
         byte[] opusData = event.getPacket().getOpusEncodedData();
         if (opusData == null || opusData.length == 0) return;
         
-        ServerLevel level = (ServerLevel) vcPlayer.getServerLevel();
-        ServerPlayer sp = (ServerPlayer) vcPlayer.getPlayer();
+        // getPlayer() returns Object — the actual Minecraft ServerPlayer
+        ServerPlayer sp = player.getPlayer() instanceof ServerPlayer p ? p : null;
+        if (sp == null) return;
         Vec3 position = sp.position();
+        
+        // getServerLevel() returns the Voice Chat API level — cast to MC's ServerLevel
+        ServerLevel level = player.getServerLevel() instanceof ServerLevel sl ? sl : null;
+        if (level == null) return;
         
         commandEngine.processVoicePacket(
             player.getUuid(),
