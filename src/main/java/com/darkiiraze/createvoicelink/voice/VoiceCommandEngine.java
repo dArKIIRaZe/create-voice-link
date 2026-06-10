@@ -64,14 +64,29 @@ public class VoiceCommandEngine {
     
     private void loadVoskModel() {
         sttExecutor.submit(() -> {
+            // First, ensure the model is downloaded
+            File modelDir = new File("config/createvoicelink/vosk-model");
+            File readyFile = new File(modelDir, ".model-ready");
+            
+            if (!readyFile.exists()) {
+                CreateVoiceLink.LOGGER.info("Vosk model not found — triggering auto-download...");
+                ModelDownloader.ensureModelAvailable();
+                
+                // Wait for download to complete (blocks this thread but not the game)
+                int waited = 0;
+                while (!ModelDownloader.isModelReady() && !ModelDownloader.getStatus().startsWith("Failed") && waited < 300) {
+                    try { Thread.sleep(1000); waited++; } catch (InterruptedException e) { break; }
+                }
+            }
+            
+            // Load the model
             try {
-                File modelDir = new File("config/createvoicelink/vosk-model");
-                if (!modelDir.exists()) {
+                if (!modelDir.exists() || !readyFile.exists()) {
                     CreateVoiceLink.LOGGER.warn(
-                        "Vosk model not found at {}. Download a small model from " +
-                        "https://alphacephei.com/vosk/models (vosk-model-small-en-us-0.15, ~40MB) " +
-                        "and extract it there.", modelDir.getAbsolutePath());
-                    modelDir.mkdirs();
+                        "Vosk model still not available after download attempt. " +
+                        "Voice commands disabled. Download manually: " +
+                        "https://alphacephei.com/vosk/models -> vosk-model-small-en-us-0.15 " +
+                        "extract to {}", modelDir.getAbsolutePath());
                     return;
                 }
                 voskModel = new Model(modelDir.getAbsolutePath());
@@ -80,6 +95,27 @@ public class VoiceCommandEngine {
                 CreateVoiceLink.LOGGER.error("Failed to load Vosk model: {}", e.getMessage());
             }
         });
+    }
+    
+    /**
+     * Ensures the model is loaded, retrying if the download just completed.
+     * Called from processVoicePacket before attempting recognition.
+     */
+    private boolean ensureModelLoaded() {
+        if (voskModel != null) return true;
+        
+        // Model hasn't loaded yet — check if download finished and try once
+        if (ModelDownloader.isModelReady()) {
+            try {
+                File modelDir = new File("config/createvoicelink/vosk-model");
+                voskModel = new Model(modelDir.getAbsolutePath());
+                CreateVoiceLink.LOGGER.info("Vosk model hot-loaded after download.");
+                return true;
+            } catch (Exception e) {
+                CreateVoiceLink.LOGGER.error("Hot-load failed: {}", e.getMessage());
+            }
+        }
+        return false;
     }
     
     // ---- Sample Capture ----
@@ -101,7 +137,7 @@ public class VoiceCommandEngine {
      * Process an incoming Opus-encoded voice packet from Simple Voice Chat.
      */
     public void processVoicePacket(UUID playerId, Vec3 playerPos, ServerLevel level, byte[] opusData) {
-        if (voskModel == null) return;
+        if (!ensureModelLoaded()) return;
         
         var decoder = voicechatApi.createDecoder();
         short[] pcm48000 = decoder.decode(opusData);

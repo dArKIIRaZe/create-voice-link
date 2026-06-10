@@ -4,8 +4,7 @@ import com.darkiiraze.createvoicelink.CreateVoiceLink;
 import com.darkiiraze.createvoicelink.block.ComputerBlockEntity;
 import com.darkiiraze.createvoicelink.network.AddCommandPacket;
 import com.darkiiraze.createvoicelink.network.RemoveCommandPacket;
-import com.darkiiraze.createvoicelink.network.NetworkHandler;
-import net.minecraft.client.Minecraft;
+import com.darkiiraze.createvoicelink.voice.ModelDownloader;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -13,7 +12,6 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
@@ -41,34 +39,27 @@ public class ComputerScreen extends AbstractContainerScreen<ComputerMenu> {
         leftPos = (width - imageWidth) / 2;
         topPos = (height - imageHeight) / 2;
         
-        // Phrase input
         phraseField = new EditBox(font, leftPos + 8, topPos + 18, 120, 20, 
             Component.literal("Voice command..."));
         phraseField.setMaxLength(64);
         addRenderableWidget(phraseField);
         
-        // Frequency item input (typed as Redstone Link item)
         freqField = new EditBox(font, leftPos + 136, topPos + 18, 80, 20,
             Component.literal("Freq item..."));
         freqField.setMaxLength(32);
         addRenderableWidget(freqField);
         
-        // Add button
         addButton = Button.builder(Component.literal("Add"), btn -> {
             String phrase = phraseField.getValue().trim();
             String freqItem = freqField.getValue().trim();
             if (!phrase.isEmpty() && !freqItem.isEmpty()) {
-                NetworkHandler.CHANNEL.send(
-                    new AddCommandPacket(phrase, freqItem, ""),
-                    PacketDistributor.SERVER.noArg()
-                );
+                PacketDistributor.sendToServer(new AddCommandPacket(phrase, freqItem, ""));
                 phraseField.setValue("");
                 freqField.setValue("");
             }
         }).bounds(leftPos + 220, topPos + 17, 30, 20).build();
         addRenderableWidget(addButton);
         
-        // Command list (scrollable area)
         rebuildCommandList();
     }
     
@@ -85,16 +76,11 @@ public class ComputerScreen extends AbstractContainerScreen<ComputerMenu> {
             ComputerBlockEntity.VoiceCommand cmd = entry.getValue();
             String label = cmd.phrase + " [" + cmd.samples.size() + " samples]";
             
-            // Delete button
             Button delBtn = Button.builder(Component.literal("X"), btn -> {
-                NetworkHandler.CHANNEL.send(
-                    new RemoveCommandPacket(cmd.phrase),
-                    PacketDistributor.SERVER.noArg()
-                );
+                PacketDistributor.sendToServer(new RemoveCommandPacket(cmd.phrase));
             }).bounds(leftPos + 218, y + idx * 22, 14, 18).build();
             addRenderableWidget(delBtn);
             commandWidgets.add(new CommandWidget(leftPos + 8, y + idx * 22, label, delBtn));
-            
             idx++;
         }
     }
@@ -108,12 +94,10 @@ public class ComputerScreen extends AbstractContainerScreen<ComputerMenu> {
     public void render(GuiGraphics gui, int mouseX, int mouseY, float partialTick) {
         super.render(gui, mouseX, mouseY, partialTick);
         
-        // Draw command labels
         for (CommandWidget cw : commandWidgets) {
             gui.drawString(font, cw.label, cw.x, cw.y + 2, 0xFFFFFF);
         }
         
-        // Draw header
         ComputerBlockEntity comp = menu.getComputer();
         String header = comp != null ? comp.getComputerName() : "Voice Computer";
         String powerText = comp != null && comp.isPowered() 
@@ -122,6 +106,22 @@ public class ComputerScreen extends AbstractContainerScreen<ComputerMenu> {
         
         gui.drawCenteredString(font, header, leftPos + imageWidth / 2, topPos + 5, 0xAAAAAA);
         gui.drawString(font, powerText, leftPos + imageWidth - 55, topPos + 5, powerColor);
+        
+        // STT model download status
+        if (!ModelDownloader.isModelReady()) {
+            int modelY = topPos + imageHeight - 14;
+            String modelStatus = ModelDownloader.getStatus();
+            int pct = ModelDownloader.getProgress();
+            
+            gui.fill(leftPos + 4, modelY - 2, leftPos + imageWidth - 4, modelY + 12, 0x80000000);
+            
+            if (pct > 0) {
+                int barWidth = (imageWidth - 20) * pct / 100;
+                gui.fill(leftPos + 6, modelY + 6, leftPos + 8 + barWidth, modelY + 9, 0xFFD4B14A);
+            }
+            
+            gui.drawString(font, Component.literal("\u27F3 " + modelStatus), leftPos + 8, modelY, 0xFFD4B14A);
+        }
     }
     
     @Override
