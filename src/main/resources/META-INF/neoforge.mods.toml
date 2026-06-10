@@ -1,0 +1,37 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+
+[[mods]]
+modId = "createvoicelink"
+version = "1.0.0"
+displayName = "Create: Voice Link"
+displayURL = "https://github.com/dArKIIRaZe/create-voice-link"
+logoFile = "assets/createvoicelink/icon.png"
+authors = "Dark, Raze Agent Collective"
+description = '''
+Speak to control your Create Redstone Links.
+Voice-activated automation for Create mod.
+Uses Vosk STT and Simple Voice Chat integration.
+'''
+license = "MIT"
+credits = "Built by Dark and the Raze Agent Collective"
+
+[[dependencies.createvoicelink]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1,)"
+
+[[dependencies.createvoicelink]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,1.22)"
+
+[[dependencies.createvoicelink]]
+modId = "create"
+type = "required"
+versionRange = "[6.0,)"
+
+[[dependencies.createvoicelink]]
+modId = "voicechat"
+type = "required"
+versionRange = "[2.5,)"

@@ -1,0 +1,20 @@
+{
+  "block.createvoicelink.microphone": "Microphone",
+  "block.createvoicelink.computer": "Voice Computer",
+  "item.createvoicelink.wrench": "Linking Wrench",
+  "itemGroup.createvoicelink": "Create: Voice Link",
+  "gui.createvoicelink.computer.title": "Voice Computer",
+  "gui.createvoicelink.computer.powered": "POWERED",
+  "gui.createvoicelink.computer.no_power": "NO POWER",
+  "gui.createvoicelink.computer.add_command": "Add Command",
+  "gui.createvoicelink.computer.phrase_hint": "Voice command phrase...",
+  "gui.createvoicelink.computer.freq_hint": "Frequency item...",
+  "gui.createvoicelink.computer.record_sample": "Record Sample",
+  "gui.createvoicelink.computer.samples": "%d samples",
+  "gui.createvoicelink.computer.no_commands": "No commands configured",
+  "msg.createvoicelink.wrench.linked_from": "Linked from %s \u00a77\u2014 right-click a Computer to complete link",
+  "msg.createvoicelink.wrench.linked_to": " linked to ",
+  "msg.createvoicelink.wrench.link_cancelled": "Link cancelled",
+  "msg.createvoicelink.wrench.cleared": "Cleared %d computer link(s) from %s",
+  "msg.createvoicelink.wrench.block_removed": "Original block removed \u00a77\u2014 link cancelled"
+}
