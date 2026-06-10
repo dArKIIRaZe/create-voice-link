@@ -3,6 +3,7 @@ package com.darkiiraze.createvoicelink.block;
 import com.darkiiraze.createvoicelink.ModBlockEntities;
 import com.darkiiraze.createvoicelink.gui.ComputerMenu;
 import com.darkiiraze.createvoicelink.link.VoiceRedstoneLink;
+import com.simibubi.create.content.redstone.link.RedstoneLinkNetworkHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -130,10 +131,13 @@ public class ComputerBlockEntity extends BlockEntity implements MenuProvider {
         if (redstoneLink == null && level != null) {
             redstoneLink = new VoiceRedstoneLink(level, worldPosition);
             // Set frequency from items if available
-            if (!cmd.freqFirst.isEmpty()) {
-                var freq = com.simibubi.create.Create.REDSTONE_LINK_NETWORK_HANDLER
-                    .getClass().getEnclosingClass(); // wrong approach, skip frequency setup for now
-            }
+            RedstoneLinkNetworkHandler.Frequency freq1 = cmd.freqFirst.isEmpty() 
+                ? null 
+                : RedstoneLinkNetworkHandler.Frequency.of(cmd.freqFirst);
+            RedstoneLinkNetworkHandler.Frequency freq2 = cmd.freqSecond.isEmpty() 
+                ? null 
+                : RedstoneLinkNetworkHandler.Frequency.of(cmd.freqSecond);
+            redstoneLink.setFrequency(freq1, freq2);
         }
         if (redstoneLink != null && level != null) {
             if (cmd.active) {
